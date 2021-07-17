@@ -1,0 +1,99 @@
+{
+	"info": {
+		"_postman_id": "f233039d-2d34-4889-80b8-38600e2f44a4",
+		"name": "marvelous_collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "getAllCharacters",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+							"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+							"var ts = new Date().getTime();\r",
+							"\r",
+							"postman.setEnvironmentVariable(\"offset\", 0);\r",
+							"postman.setEnvironmentVariable(\"ts\", ts);\r",
+							"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+							"\r",
+							"var message = ts+pvtkey+pubkey;\r",
+							"var a = CryptoJS.MD5(message);\r",
+							"postman.setEnvironmentVariable(\"hash\", a.toString());"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status test\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"let jsonData = pm.response.json();\r",
+							"pm.test('There is a name for each character', () => {\r",
+							"    \r",
+							"    _.each(jsonData.data.results, (item) => {\r",
+							"        pm.expect(item.name).length.greaterThan(0);\r",
+							"    });\r",
+							"});\r",
+							"console.log(\"results: \" + jsonData.data.results.length);\r",
+							"if(jsonData.data.results.length > 0 || pm.environment.get(\"offset\") < 30) {\r",
+							"    postman.setEnvironmentVariable(\"offset\", pm.environment.get(\"offset\") + 5);\r",
+							"\r",
+							"    console.log(\"offset : \" +  pm.environment.get(\"offset\"));\r",
+							"    postman.setNextRequest(\"getAllCharacters\");\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=5&offset={{offset}}",
+					"protocol": "https",
+					"host": [
+						"gateway",
+						"marvel",
+						"com"
+					],
+					"path": [
+						"v1",
+						"public",
+						"characters"
+					],
+					"query": [
+						{
+							"key": "ts",
+							"value": "{{ts}}"
+						},
+						{
+							"key": "apikey",
+							"value": "{{apikey}}"
+						},
+						{
+							"key": "hash",
+							"value": "{{hash}}"
+						},
+						{
+							"key": "limit",
+							"value": "5"
+						},
+						{
+							"key": "offset",
+							"value": "{{offset}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
