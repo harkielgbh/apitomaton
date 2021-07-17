@@ -6,94 +6,890 @@
 	},
 	"item": [
 		{
-			"name": "getAllCharacters",
-			"event": [
+			"name": "characters",
+			"item": [
 				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
-							"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
-							"var ts = new Date().getTime();\r",
-							"\r",
-							"postman.setEnvironmentVariable(\"offset\", 0);\r",
-							"postman.setEnvironmentVariable(\"ts\", ts);\r",
-							"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
-							"\r",
-							"var message = ts+pvtkey+pubkey;\r",
-							"var a = CryptoJS.MD5(message);\r",
-							"postman.setEnvironmentVariable(\"hash\", a.toString());"
-						],
-						"type": "text/javascript"
-					}
+					"name": "getAllCharacterInvalidParam",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Expect message to match code', () => {\r",
+									"    pm.expect(jsonData.status).to.equal(\"invalid is not a valid ordering parameter.\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&orderBy=invalid",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "orderBy",
+									"value": "invalid"
+								}
+							]
+						}
+					},
+					"response": []
 				},
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Status test\", function () {\r",
-							"    pm.response.to.have.status(200);\r",
-							"});\r",
-							"let jsonData = pm.response.json();\r",
-							"pm.test('There is a name for each character', () => {\r",
-							"    \r",
-							"    _.each(jsonData.data.results, (item) => {\r",
-							"        pm.expect(item.name).length.greaterThan(0);\r",
-							"    });\r",
-							"});\r",
-							"console.log(\"results: \" + jsonData.data.results.length);\r",
-							"if(jsonData.data.results.length > 0 || pm.environment.get(\"offset\") < 30) {\r",
-							"    postman.setEnvironmentVariable(\"offset\", pm.environment.get(\"offset\") + 5);\r",
-							"\r",
-							"    console.log(\"offset : \" +  pm.environment.get(\"offset\"));\r",
-							"    postman.setNextRequest(\"getAllCharacters\");\r",
-							"}"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=5&offset={{offset}}",
-					"protocol": "https",
-					"host": [
-						"gateway",
-						"marvel",
-						"com"
-					],
-					"path": [
-						"v1",
-						"public",
-						"characters"
-					],
-					"query": [
+					"name": "getAllCharacterNamesOverLimit",
+					"event": [
 						{
-							"key": "ts",
-							"value": "{{ts}}"
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Expect message to match code', () => {\r",
+									"    pm.expect(jsonData.status).to.equal(\"You may not request more than 100 items.\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
 						},
 						{
-							"key": "apikey",
-							"value": "{{apikey}}"
-						},
-						{
-							"key": "hash",
-							"value": "{{hash}}"
-						},
-						{
-							"key": "limit",
-							"value": "5"
-						},
-						{
-							"key": "offset",
-							"value": "{{offset}}"
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
 						}
-					]
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=101",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "limit",
+									"value": "101"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllCharactersBelowZero",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"\r",
+									"pm.test('Expect message to match code', () => {\r",
+									"    pm.expect(jsonData.status).to.equal(\"You must pass an integer limit greater than 0.\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=-1",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "limit",
+									"value": "-1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllCharactersOffset",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"if (!pm.environment.get(\"offset\")){\r",
+									"    postman.setEnvironmentVariable(\"offset\", 0);\r",
+									"}\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('There is a name for each character', () => {\r",
+									"    _.each(jsonData.data.results, (item) => {\r",
+									"        pm.expect(item.name).length.greaterThan(0);\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.data.total).to.equal(1493);\r",
+									"});\r",
+									"\r",
+									"var tmp = pm.environment.get(\"offset\");\r",
+									"var max = 2500;\r",
+									"\r",
+									"console.log(\"Items in current page: \" + jsonData.data.results.length);\r",
+									"if(jsonData.data.results.length > 0 && max > tmp) {\r",
+									"    postman.setEnvironmentVariable(\"offset\", +tmp + +100);\r",
+									"    console.log(\"offset : \" +  pm.environment.get(\"offset\"));\r",
+									"    postman.setNextRequest(\"getAllCharactersOffset\");\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=100&offset={{offset}}",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "offset",
+									"value": "{{offset}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllCharactersFoeParam",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.status).to.equal(\"We don't recognize the parameter liddmit\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters/1011054/comics?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&liddmit=100",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters",
+								"1011054",
+								"comics"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "liddmit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
+		},
+		{
+			"name": "spiderman_comics",
+			"item": [
+				{
+					"name": "getAllSpiderComicsUpc",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.data.results[0].upc).to.equal('5960605109-04311');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters/1011054/comics?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&upc=5960605109-04311",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters",
+								"1011054",
+								"comics"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "upc",
+									"value": "5960605109-04311"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllSpiderComics",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of comics is correct', () => {\r",
+									"    pm.expect(jsonData.data.total).to.equal(44);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters/1011054/comics?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=100",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters",
+								"1011054",
+								"comics"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllSpiderComicsDate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected comics date filter range incorrect', () => {\r",
+									"    pm.expect(jsonData.status).to.equal(\"You must pass both a start date and end date in order to send a date range.\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/characters/1011054/comics?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&limit=100&dateRange='2013-01-01,2013-01-02,2013-01-02'",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"characters",
+								"1011054",
+								"comics"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "dateRange",
+									"value": "'2013-01-01,2013-01-02,2013-01-02'"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "xmen_comics",
+			"item": [
+				{
+					"name": "getXmenCharactersStartWith",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.data.total).to.equal(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/comics/1332/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}&nameStartsWith=ar",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"comics",
+								"1332",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								},
+								{
+									"key": "nameStartsWith",
+									"value": "ar"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getXmenCharactersInvalidKey",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"bad\";\r",
+									"var pvtkey = \"creds\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 200\", function () {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.code).to.equal(\"InvalidCredentials\");\r",
+									"    pm.expect(jsonData.message).to.equal(\"The passed API key is invalid.\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/comics/1332/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"comics",
+								"1332",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getXmenCharactersForComic",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var pubkey = \"c9af61d481cd5529511873acc35b79f9\";\r",
+									"var pvtkey = \"f49e5148a656cb301dc53891c40d2cb959ed2da8\";\r",
+									"var ts = new Date().getTime();\r",
+									"\r",
+									"postman.setEnvironmentVariable(\"ts\", ts);\r",
+									"postman.setEnvironmentVariable(\"apikey\", pubkey);\r",
+									"\r",
+									"var message = ts+pvtkey+pubkey;\r",
+									"var a = CryptoJS.MD5(message);\r",
+									"postman.setEnvironmentVariable(\"hash\", a.toString());\r",
+									"\r",
+									"38002"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Expect status 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"let jsonData = pm.response.json();\r",
+									"pm.test('Expected Ammount of characters is correct', () => {\r",
+									"    pm.expect(jsonData.data.total).to.equal(10);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://gateway.marvel.com/v1/public/comics/1332/characters?ts={{ts}}&apikey={{apikey}}&hash={{hash}}",
+							"protocol": "https",
+							"host": [
+								"gateway",
+								"marvel",
+								"com"
+							],
+							"path": [
+								"v1",
+								"public",
+								"comics",
+								"1332",
+								"characters"
+							],
+							"query": [
+								{
+									"key": "ts",
+									"value": "{{ts}}"
+								},
+								{
+									"key": "apikey",
+									"value": "{{apikey}}"
+								},
+								{
+									"key": "hash",
+									"value": "{{hash}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	]
 }
